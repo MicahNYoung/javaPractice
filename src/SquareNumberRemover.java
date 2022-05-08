@@ -5,6 +5,7 @@ import java.lang.Math;
 public class SquareNumberRemover {
     private static Integer currentValue;
     static HashMap<Integer, ArrayList<Integer>> squarePairs = new HashMap<>();
+    static ArrayList<Integer> newArrayList = new ArrayList<Integer>();
 //new idea: input highest and lowest numbers, calculate what the possible squares could be within that. test against those squares.
 //One of the issues is that the program is currently just matching the first square and adding it to the array, which prevents other options from being checked.
 
@@ -21,7 +22,7 @@ public class SquareNumberRemover {
         ;
 //        new ArrayList<Integer>(Arrays.asList(
 //                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
-        ArrayList<Integer> newArrayList = new ArrayList<Integer>();
+
         ArrayList<ArrayList<Integer>> allValidResults = new ArrayList<ArrayList<Integer>>();
 
 
@@ -71,7 +72,7 @@ public class SquareNumberRemover {
 //                    if(copy.contains(currentValue)){
 ////                        for(int i=0; i < copy.size(); i++) {
 //
-//                            if(!newArrayList.contains((int)element1.getKey())){
+//                            if(!franewArrayList.contains((int)element1.getKey())){
 //                                newArrayList.add((int)element1.getKey());
 //                                System.out.println(newArrayList);
 //                                currentValue = (int)element1.getKey();
@@ -85,25 +86,62 @@ public class SquareNumberRemover {
 //        }
 
         for(Map.Entry element: squarePairs.entrySet()){
+            newArrayList.clear();
             int currentValue = (int) element.getKey();
+            newArrayList.add(currentValue);
+            ArrayList<Integer> potentialNextCurrentValue = new ArrayList<>();
 
-            findAllMatchingSets(currentValue);
-            System.out.println(findAllMatchingSets(currentValue));
+            while(newArrayList.size() > 15) {
+                potentialNextCurrentValue = findAllMatchingSets(currentValue);
+                newArrayList.add(potentialNextCurrentValue.get(0));
+                if(potentialNextCurrentValue.size() > 0) {
+                    currentValue = potentialNextCurrentValue.get(0);
+                    continue;
+                } else {
+                    if(newArrayList.size() < 15) {
+                        ////insert conditional for findWhereItAllWentWrong logic
+                        if(){
+                            currentValue = //value added by findWhereItAllWentWrong()
+                            continue;
+                        } else {
+
+                        }
+                        findWhereItAllWentWrong();
+                    } else {
+                        System.out.println(newArrayList);
+                    }
+                }
+
+            }
+
         }
     }
 
     //finds all sets which have a valid key. (aka, adds up with currentValue to equal square num and not in newArrayList already.
-    private static ArrayList<Object> findAllMatchingSets(int currentValue) {
-        ArrayList<Object> matchingSets = new ArrayList<>();
+    public static ArrayList<Integer> findAllMatchingSets(int currentValue) {
+        ArrayList<Integer> potentialNextCurrentValue = new ArrayList<>();
+
         for(Map.Entry element : squarePairs.entrySet()) {
-//            if(!newArrayList.comtains((int) element.getKey());
-            ArrayList<Integer> copy = squarePairs.get(element.getKey());
-            if(copy.contains(currentValue)){
-                matchingSets.add(element);
+            if(!newArrayList.contains((int) element.getKey())){
+                ArrayList<Integer> copy = squarePairs.get(element.getKey());
+                if(copy.contains(currentValue)){
+                    potentialNextCurrentValue.add((int) element.getKey());
+                }
             }
         }
-        return matchingSets;
+        return potentialNextCurrentValue;
     }
+    public static void findWhereItAllWentWrong() {
+
+        newArrayList.remove(newArrayList.size() - 1);
+        ArrayList<Integer> valuesBeingChecked = findAllMatchingSets(newArrayList.size() - 1);
+        for(Integer el : valuesBeingChecked){
+            if(!newArrayList.contains(el)){
+                newArrayList.add(el);
+            }
+        }
+    }
+
 
 
 
