@@ -19,26 +19,13 @@ public class SquareNumberRemover {
         ArrayList<Integer> myArrayList2;
         ArrayList<Integer> neverChangingArrayList = new ArrayList<Integer>(Arrays.asList(
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
+        ArrayList<Integer> possibleSquareNumbers = new ArrayList<>()
         ;
 //        new ArrayList<Integer>(Arrays.asList(
 //                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
 
         ArrayList<ArrayList<Integer>> allValidResults = new ArrayList<ArrayList<Integer>>();
 
-
-//        What we need to keep track of:
-//              Current Value, comparison value
-//        What we need to do:
-//              Compare two numbers, establish if their sum is a Square number, if it is
-        //      push both number to new list, remove from old.
-        //      Compare last element's value of new array to items in old array
-        //      find one that adds to it to be a square number.
-//        for(Integer i : myArrayList)
-//                int firstNum = myArrayList.get(0);
-//
-//
-//
-//            }
 
         myArrayList2 = neverChangingArrayList;
 
@@ -50,72 +37,76 @@ public class SquareNumberRemover {
                 }
                 if (Math.sqrt(sum) % 1 == 0) {
                     squarePairs.get(num).add(compNum);
+                    if(!possibleSquareNumbers.contains(sum)){
+                        possibleSquareNumbers.add(sum);
+                    }
                 }
             }
         }
+        System.out.println(possibleSquareNumbers);
 
         System.out.println(squarePairs);
+        Boolean test = false;
 
-//having trouble with
-//        for(Map.Entry element: squarePairs.entrySet()){
-//            //adds the starting key as the first value in the newArrayList
-//            newArrayList.add((int)(element.getKey()));
-//            //initializing first value in array as the first currentValue. currentValue will change each time we find a match to the previous currentValue.
-//            int currentValue = (int)(element.getKey());
-//
-//            //iterating through hashmap, trying to find a value in one of the other sets,
-//            while(newArrayList.size() < 15){
-//                for(Map.Entry element1: squarePairs.entrySet()) {
-//                    //initializing copy as current ArrayList because unable to iterate through ArrayLists as objects.
-//                    ArrayList<Integer> copy = squarePairs.get(element1.getKey());
-//                    //checking if copy contains current value, if it does, adding the key
-//                    if(copy.contains(currentValue)){
-////                        for(int i=0; i < copy.size(); i++) {
-//
-//                            if(!franewArrayList.contains((int)element1.getKey())){
-//                                newArrayList.add((int)element1.getKey());
-//                                System.out.println(newArrayList);
-//                                currentValue = (int)element1.getKey();
-////                                break;
-//                            }
-////                        }
-//                    }
-//                }
-//            }
-//
-//        }
 
-        for(Map.Entry element: squarePairs.entrySet()){
-            newArrayList.clear();
-            int currentValue = (int) element.getKey();
-            newArrayList.add(currentValue);
-            ArrayList<Integer> potentialNextCurrentValue = new ArrayList<>();
+            for(int i = 0; i < neverChangingArrayList.size(); i++){
+                //Selects first number as starting number
+                newArrayList.clear();
+                newArrayList.add(neverChangingArrayList.get(i));
+                myArrayList.remove(neverChangingArrayList.get(i));
 
-            while(newArrayList.size() > 15) {
-                potentialNextCurrentValue = findAllMatchingSets(currentValue);
-                newArrayList.add(potentialNextCurrentValue.get(0));
-                if(potentialNextCurrentValue.size() > 0) {
-                    currentValue = potentialNextCurrentValue.get(0);
-                    continue;
-                } else {
-                    if(newArrayList.size() < 15) {
-                        ////insert conditional for findWhereItAllWentWrong logic
-                        if(){
-                            currentValue = //value added by findWhereItAllWentWrong()
-                            continue;
-                        } else {
-
-                        }
-                        findWhereItAllWentWrong();
-                    } else {
-                        System.out.println(newArrayList);
+                int counter = 0;
+                while(!test){
+                    currentValue = (newArrayList.get(newArrayList.size()-1));
+                    //prevents infinite loop.
+                    if(counter > 15){
+                        break;
                     }
-                }
 
+                    if(newArrayList.size() == 15){
+                        System.out.println("Done, the new list is: " + newArrayList);
+                        test = true;
+                        continue;
+                    }
+
+                    ArrayList<Integer> currentValueMatchingsets = findAllMatchingSets(currentValue);
+//                    System.out.println(currentValueMatchingsets);
+                    if(currentValueMatchingsets.size() > 0){
+                        newArrayList.add(currentValueMatchingsets.get(0));
+                        currentValueMatchingsets.remove(currentValueMatchingsets.get(0));
+                    } else{
+                        break;
+                    }
+
+
+
+                    System.out.println(newArrayList);
             }
 
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //finds all sets which have a valid key. (aka, adds up with currentValue to equal square num and not in newArrayList already.
     public static ArrayList<Integer> findAllMatchingSets(int currentValue) {
