@@ -1,3 +1,5 @@
+//import com.sun.org.apache.xerces.internal.dom.DOMStringListImpl;
+
 import java.util.*;
 import java.lang.Math;
 
@@ -5,26 +7,28 @@ import java.lang.Math;
 public class SquareNumberRemover {
     private static Integer currentValue;
     static HashMap<Integer, ArrayList<Integer>> squarePairs = new HashMap<>();
-    static ArrayList<Integer> newArrayList = new ArrayList<Integer>();
+
+
+    static ArrayList<ArrayList<Integer>> deadEnds = new ArrayList<>();
 //new idea: input highest and lowest numbers, calculate what the possible squares could be within that. test against those squares.
 //One of the issues is that the program is currently just matching the first square and adding it to the array, which prevents other options from being checked.
 
 
     //The problem with this approach is that it's potentially possible that the I cannot start
     public static void main(String[] args) {
-
+        ArrayList<Integer> newArrayList = new ArrayList<Integer>();
 
         ArrayList<Integer> myArrayList = new ArrayList<Integer>(Arrays.asList(
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
         ArrayList<Integer> myArrayList2;
         ArrayList<Integer> neverChangingArrayList = new ArrayList<Integer>(Arrays.asList(
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
-        ArrayList<Integer> possibleSquareNumbers = new ArrayList<>()
-        ;
+        ArrayList<Integer> possibleSquareNumbers = new ArrayList<>();
 //        new ArrayList<Integer>(Arrays.asList(
 //                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
 
         ArrayList<ArrayList<Integer>> allValidResults = new ArrayList<ArrayList<Integer>>();
+
 
 
         myArrayList2 = neverChangingArrayList;
@@ -50,36 +54,70 @@ public class SquareNumberRemover {
 
 
             for(int i = 0; i < neverChangingArrayList.size(); i++){
-                //Selects first number as starting number
+                //Clears out newArraysList to start fresh.
                 newArrayList.clear();
+                //Selects first number as starting number
                 newArrayList.add(neverChangingArrayList.get(i));
+                //removes int from myArrayList as to not reuse it.
                 myArrayList.remove(neverChangingArrayList.get(i));
 
+                //counter is to exit loop if newArrayList has tried every variation? NOT SURE IF THIS WORKS
                 int counter = 0;
+
+                //loop terminates if newArrayList.size() == 15
                 while(!test){
+                    //gets current value (last value in newArrayList)
                     currentValue = (newArrayList.get(newArrayList.size()-1));
                     //prevents infinite loop.
                     if(counter > 15){
                         break;
                     }
-
+                    //exit loop condition.
                     if(newArrayList.size() == 15){
                         System.out.println("Done, the new list is: " + newArrayList);
                         test = true;
                         continue;
                     }
 
-                    ArrayList<Integer> currentValueMatchingsets = findAllMatchingSets(currentValue);
+                    //stores all matching sets EX: currentvalue = 1 would produce [3,8,15] assuming none of those are in newArrayList
+                    ArrayList<Integer> currentValueMatchingsets = findAllMatchingSets(currentValue, newArrayList);
 //                    System.out.println(currentValueMatchingsets);
+                    //Supposed to give a fresh start.
+                        //MIGHT NEED TO CHECK IF VALUE BEING ADDED/ REMOVED HERE HAS ALREADY BEEN TRIED VIA deadEnds;
                     if(currentValueMatchingsets.size() > 0){
                         newArrayList.add(currentValueMatchingsets.get(0));
                         currentValueMatchingsets.remove(currentValueMatchingsets.get(0));
+                        //supposed to add shortened arrayList to deadEnds because currentValueMatchingsets.size() == 0 means there is no viable options on this path.
                     } else{
-                        break;
+                        ArrayList<Integer> copyOfNewArrayList = new ArrayList<>();
+                        copyOfNewArrayList = (ArrayList<Integer>) newArrayList.clone();
+                        deadEnds.add(copyOfNewArrayList);
+
+                        //Check that function isn't being called twice.
+//                        ArrayList<Integer> newTry = findWhereItAllWentWrong(deadEnds, newArrayList);
+
+                        //MIGHT NEED TO REMOVE ONE MORE HERE. WHY WOULD THIS execute here and not on line 87?
+                            //BROKEN: Needs different condition or currentValueMatchingsets needs to be changed before this do/while.
+                        do{
+                            if(currentValueMatchingsets.size() > 0) {
+                                currentValueMatchingsets.remove(currentValueMatchingsets.indexOf(newArrayList.get(newArrayList.size()-1)));
+                                System.out.println(currentValueMatchingsets);
+                                newArrayList.remove(newArrayList.size()-1);
+                                newArrayList = findWhereItAllWentWrong(deadEnds, newArrayList);
+                            } else{
+                                break;
+                            }
+
+                        }while(deadEnds.contains(newArrayList));
+
+
+
+
+
                     }
 
 
-
+                    counter++;
                     System.out.println(newArrayList);
             }
 
@@ -109,7 +147,7 @@ public class SquareNumberRemover {
 
 
     //finds all sets which have a valid key. (aka, adds up with currentValue to equal square num and not in newArrayList already.
-    public static ArrayList<Integer> findAllMatchingSets(int currentValue) {
+    public static ArrayList<Integer> findAllMatchingSets(int currentValue, ArrayList<Integer> newArrayList) {
         ArrayList<Integer> potentialNextCurrentValue = new ArrayList<>();
 
         for(Map.Entry element : squarePairs.entrySet()) {
@@ -122,15 +160,24 @@ public class SquareNumberRemover {
         }
         return potentialNextCurrentValue;
     }
-    public static void findWhereItAllWentWrong() {
+    public static ArrayList<Integer> findWhereItAllWentWrong(ArrayList<ArrayList<Integer>> deadEnds, ArrayList<Integer> newArrayList) {
 
-        newArrayList.remove(newArrayList.size() - 1);
-        ArrayList<Integer> valuesBeingChecked = findAllMatchingSets(newArrayList.size() - 1);
+//        newArrayList.remove(newArrayList.size() - 1);
+        ArrayList<Integer> valuesBeingChecked = findAllMatchingSets(newArrayList.get(newArrayList.size() - 1), newArrayList);
+        ArrayList<Integer> copyOfNewArrayList = (ArrayList<Integer>) newArrayList.clone();
+
         for(Integer el : valuesBeingChecked){
-            if(!newArrayList.contains(el)){
-                newArrayList.add(el);
+            copyOfNewArrayList.add(el);
+            if(valuesBeingChecked.size() == 0 && !deadEnds.contains(copyOfNewArrayList)){
+                copyOfNewArrayList.remove(copyOfNewArrayList.size() - 1);
+                deadEnds.add(copyOfNewArrayList);
+            } else if(deadEnds.contains(copyOfNewArrayList)){
+                copyOfNewArrayList.remove(copyOfNewArrayList.size()-1);
+
             }
+
         }
+        return copyOfNewArrayList;
     }
 
 
