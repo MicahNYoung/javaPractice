@@ -1,5 +1,14 @@
+//What I've Learned:
+// Identify broken block.
+    //Focus on predicting what should happen next vs. what happens next.
+    //Debug various blocks of your code where you suspect problem to be.
+    //Expand if necessary
+    //Narrow it down
+// Debug broken block with utmost scrutiny.
+    //conditional breakpoints to increase debugging speed.
 //import com.sun.org.apache.xerces.internal.dom.DOMStringListImpl;
 
+//BROKEN: counter varible is preventing the variation that starts with 8 from fully executing, but if I increase counter variable, even by 1, it loops infinitely.
 import java.util.*;
 import java.lang.Math;
 
@@ -69,7 +78,8 @@ public class SquareNumberRemover {
                     //gets current value (last value in newArrayList)
                     currentValue = (newArrayList.get(newArrayList.size()-1));
                     //prevents infinite loop.
-                    if(counter > 15){
+                    //BROKEN: the counter increment aka counter++ is in the wrong place
+                    if(counter > 34){
                         break;
                     }
                     //exit loop condition.
@@ -99,15 +109,25 @@ public class SquareNumberRemover {
                         //MIGHT NEED TO REMOVE ONE MORE HERE. WHY WOULD THIS execute here and not on line 87?
                             //BROKEN: Needs different condition or currentValueMatchingsets needs to be changed before this do/while.
                         do{
-                            if(currentValueMatchingsets.size() > 0) {
-                                currentValueMatchingsets.remove(currentValueMatchingsets.indexOf(newArrayList.get(newArrayList.size()-1)));
-                                System.out.println(currentValueMatchingsets);
+                            if(newArrayList.size() > 1 ){
                                 newArrayList.remove(newArrayList.size()-1);
-                                newArrayList = findWhereItAllWentWrong(deadEnds, newArrayList);
-                            } else{
+                                currentValue = (newArrayList.get(newArrayList.size()-1));
+                                currentValueMatchingsets = findAllMatchingSets(currentValue, newArrayList);
+                                if(currentValueMatchingsets.size() > 0){
+//                                    currentValueMatchingsets.indexOf(newArrayList.get(newArrayList.size()-1)) == -1
+//                                    currentValueMatchingsets.remove(currentValueMatchingsets.indexOf(newArrayList.get(newArrayList.size()-1)));
+                                    System.out.println(currentValueMatchingsets);
+//                                    newArrayList = findWhereItAllWentWrong(deadEnds, newArrayList);
+
+                                    newArrayList.add(currentValueMatchingsets.get(0));
+                                }
+
+                            } else {
+                                deadEnds.add(newArrayList);
                                 break;
                             }
-
+                            //BROKEN: do While is exiting before all variations are found Example: [9, 7, 2, 14, 11, 5, 4, 12, 13, 3, 1, 15] meets exit criteria
+                            //Solution: Add in additional while loop.
                         }while(deadEnds.contains(newArrayList));
 
 
@@ -118,7 +138,7 @@ public class SquareNumberRemover {
 
 
                     counter++;
-                    System.out.println(newArrayList);
+                    System.out.println(newArrayList + " counter is" + counter);
             }
 
         }
@@ -149,14 +169,18 @@ public class SquareNumberRemover {
     //finds all sets which have a valid key. (aka, adds up with currentValue to equal square num and not in newArrayList already.
     public static ArrayList<Integer> findAllMatchingSets(int currentValue, ArrayList<Integer> newArrayList) {
         ArrayList<Integer> potentialNextCurrentValue = new ArrayList<>();
+        ArrayList<Integer> testArrayListForDeadEnd = (ArrayList<Integer>) newArrayList.clone();
 
+    //ADDED a check to see if adding the element would result in an array that would be a dead end.
         for(Map.Entry element : squarePairs.entrySet()) {
-            if(!newArrayList.contains((int) element.getKey())){
+            testArrayListForDeadEnd.add((int) element.getKey());
+            if(!newArrayList.contains((int) element.getKey()) && !deadEnds.contains(testArrayListForDeadEnd)){
                 ArrayList<Integer> copy = squarePairs.get(element.getKey());
                 if(copy.contains(currentValue)){
                     potentialNextCurrentValue.add((int) element.getKey());
                 }
             }
+            testArrayListForDeadEnd.remove(testArrayListForDeadEnd.size() - 1);
         }
         return potentialNextCurrentValue;
     }
